@@ -1,4 +1,4 @@
-package com.example.ecommerce.order.rest;
+package com.ecommerce.order.rest;
 
 import java.util.List;
 
@@ -12,19 +12,34 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.ecommerce.order.enity.Order;
-import com.example.ecommerce.order.service.IOrderServiceMgmt;
+import com.ecommerce.order.client.InventoryClient;
+import com.ecommerce.order.model.Order;
+import com.ecommerce.order.service.IOrderServiceMgmt;
 
 @RestController
 @RequestMapping("/order-api")
 public class OrderOperationController {
     @Autowired
     private IOrderServiceMgmt  orderService;
+    
+    @Autowired
+    private InventoryClient inventoryClient;
     @PostMapping("/create-order")
-    public ResponseEntity<Order> createOrder(@RequestBody Order order) {
-        Order createdOrder = orderService.createOrder(order);
-        return new ResponseEntity<Order>(createdOrder, HttpStatus.CREATED);
+    public ResponseEntity<String> createOrder(@RequestBody Order order) {
+        // Call InventoryService
+        Boolean inStock = inventoryClient.checkStock(order.getProductCode(), order.getQuantity());
+
+        if (Boolean.TRUE.equals(inStock)) {
+            // Save order if product is in stock
+            Order createdOrder = orderService.createOrder(order);
+            return new ResponseEntity<>("Order placed successfully with ID: " + createdOrder.getId(),
+                                        HttpStatus.CREATED);
+        } else {
+            // Reject order if product is out of stock
+            return new ResponseEntity<>("❌ Product is out of stock!", HttpStatus.BAD_REQUEST);
+        }
     }
+
 
     @GetMapping("/show-order/{id}")
     public ResponseEntity<Order> showOrder(@PathVariable Long id) {

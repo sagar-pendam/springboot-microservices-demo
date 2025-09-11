@@ -1,8 +1,8 @@
-package com.example.ecommerce.order.service;
-
-import com.example.ecommerce.order.enity.Order;
+package com.ecommerce.order.service;
 
 import java.util.List;
+
+import com.ecommerce.order.model.Order;
 
 public interface IOrderServiceMgmt {
 

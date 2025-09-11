@@ -1,4 +1,4 @@
-package com.example.ecommerce.order.enity;
+package com.ecommerce.product.model;
 
 import java.io.Serializable;
 
@@ -12,19 +12,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "products")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
-public class Order implements Serializable {
+public class Product implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;
-    private Double totalAmount;
-    private String status; // PENDING, COMPLETED, CANCELLED
-
-    // getters & setters
+    private String productCode;  // unique identifier
+    private String name;
+    private String description;
+    private Double price;
+    private String category;
 }

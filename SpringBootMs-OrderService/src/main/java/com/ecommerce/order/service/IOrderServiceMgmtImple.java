@@ -1,10 +1,11 @@
-package com.example.ecommerce.order.service;
+package com.ecommerce.order.service;
 
 
-import com.example.ecommerce.order.enity.Order;
-import com.example.ecommerce.order.repository.IOrderServiceRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.ecommerce.order.model.Order;
+import com.ecommerce.order.repository.IOrderServiceRepo;
 
 import java.util.List;
 

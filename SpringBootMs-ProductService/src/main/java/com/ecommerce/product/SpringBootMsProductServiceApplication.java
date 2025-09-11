@@ -1,15 +1,17 @@
-package com.example.ecommerce.order;
+package com.ecommerce.product;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-public class SpringBootMsOrderServiceApplication {
+@EnableFeignClients(basePackages = "com.ecommerce.product.client")
+public class SpringBootMsProductServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SpringBootMsOrderServiceApplication.class, args);
+		SpringApplication.run(SpringBootMsProductServiceApplication.class, args);
 	}
 
 }

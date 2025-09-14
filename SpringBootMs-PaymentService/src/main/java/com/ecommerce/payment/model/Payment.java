@@ -1,8 +1,4 @@
-package com.ecommerce.order.model;
-
-import java.io.Serializable;
-
-import com.ecommerce.order.enums.OrderStatus;
+package com.ecommerce.payment.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,20 +12,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "payments")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Order implements Serializable {
-
+public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;
-    private String productCode;   //  needed for Inventory check
-    private int quantity;         //  needed for Inventory check
+    private Long orderId;
     private Double amount;
-    @Enumerated(EnumType.STRING)   // 👈 saves enum as string in DB
-    private OrderStatus status;// PENDING, COMPLETED, CANCELLED
+
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status;
 }

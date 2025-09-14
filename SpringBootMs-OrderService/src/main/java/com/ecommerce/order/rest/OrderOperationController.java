@@ -1,10 +1,12 @@
 package com.ecommerce.order.rest;
 
 import java.util.List;
+import com.ecommerce.order.enums.OrderStatus;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ecommerce.order.client.InventoryClient;
+import com.ecommerce.order.events.OrderEvent;
 import com.ecommerce.order.model.Order;
 import com.ecommerce.order.service.IOrderServiceMgmt;
 
@@ -24,22 +27,28 @@ public class OrderOperationController {
     
     @Autowired
     private InventoryClient inventoryClient;
+    @Autowired
+    private KafkaTemplate<String, OrderEvent> kafkaTemplate;
     @PostMapping("/create-order")
     public ResponseEntity<String> createOrder(@RequestBody Order order) {
-        // Call InventoryService
-        Boolean inStock = inventoryClient.checkStock(order.getProductCode(), order.getQuantity());
 
-        if (Boolean.TRUE.equals(inStock)) {
-            // Save order if product is in stock
-            Order createdOrder = orderService.createOrder(order);
-            return new ResponseEntity<>("Order placed successfully with ID: " + createdOrder.getId(),
-                                        HttpStatus.CREATED);
-        } else {
-            // Reject order if product is out of stock
-            return new ResponseEntity<>("❌ Product is out of stock!", HttpStatus.BAD_REQUEST);
-        }
+        // Save order as PENDING
+        order.setStatus(OrderStatus.PENDING);
+        Order createdOrder = orderService.createOrder(order);
+
+        // Publish ORDER_CREATED event to inventory
+        OrderEvent orderEvent = new OrderEvent(
+            createdOrder.getId(),
+            createdOrder.getProductCode(),
+            createdOrder.getQuantity(),
+            createdOrder.getAmount(),
+            "ORDER_CREATED"
+        );
+
+        kafkaTemplate.send("order-events", orderEvent);
+
+        return new ResponseEntity<>("Order placed successfully with ID: " + createdOrder.getId() + " (Pending Inventory)", HttpStatus.CREATED);
     }
-
 
     @GetMapping("/show-order/{id}")
     public ResponseEntity<Order> showOrder(@PathVariable Long id) {
